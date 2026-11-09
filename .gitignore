@@ -1,0 +1,5 @@
+.cache/
+.idea/
+.venv/
+weather.json
+__pycache__/
