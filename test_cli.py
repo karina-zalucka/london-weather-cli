@@ -28,10 +28,13 @@ class WeatherCliTests(unittest.TestCase):
         )
 
     def run_cli(self, *arguments):
+        module_path = weather.__file__
+        assert module_path is not None, "weather module must have a file path"
+
         return subprocess.run(
             [
                 sys.executable,
-                str(Path(weather.__file__).resolve()),
+                str(Path(module_path).resolve()),
                 *arguments,
             ],
             cwd=self.temp_dir.name,
