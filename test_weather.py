@@ -210,6 +210,24 @@ class WeatherTests(unittest.TestCase):
         )
         self.assertEqual(weather.weather_codes_report([]), "")
 
+    @patch("weather.fetch_data")
+    def test_failed_refresh_preserves_existing_cache(self, mock_fetch):
+        original = json.dumps(self.data)
+        self.cache.write_text(original, encoding="utf-8")
+        mock_fetch.return_value = {"daily": {}}
+
+        with patch("weather.json.dump", side_effect=OSError("disk full")):
+            with self.assertRaisesRegex(RuntimeError, "Could not write"):
+                weather.load_data(self.cache, refresh=True)
+
+        self.assertEqual(
+            self.cache.read_text(encoding="utf-8"),
+            original,
+        )
+        self.assertEqual(
+            set(self.cache.parent.iterdir()),
+            {self.cache},
+        )
 
 if __name__ == "__main__":
     unittest.main()

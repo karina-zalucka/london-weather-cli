@@ -7,8 +7,8 @@ import math
 import logging
 from collections import Counter
 import sys
-
-
+import os
+import tempfile
 
 URL = "https://archive-api.open-meteo.com/v1/archive"
 #https://open-meteo.com/en/docs/historical-weather-api
@@ -83,15 +83,39 @@ def load_data(cache_path, refresh=False):
     logging.debug("Fetching data from the API. Refresh: %s", refresh)
     data = fetch_data()
 
+    temporary_path = None
+
     try:
         cache_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with cache_path.open("w", encoding="utf-8") as file:
+        with tempfile.NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8",
+                dir=cache_path.parent,
+                prefix=f".{cache_path.name}.",
+                suffix=".tmp",
+                delete=False,
+        ) as file:
+            temporary_path = Path(file.name)
             json.dump(data, file, ensure_ascii=False, indent=2)
+
+        os.replace(temporary_path, cache_path)
+
     except OSError as error:
         raise RuntimeError(
             f"Could not write cache file {cache_path}: {error}"
         ) from None
+
+    finally:
+        if temporary_path is not None:
+            try:
+                temporary_path.unlink(missing_ok=True)
+            except OSError as error:
+                logging.warning(
+                    "Could not remove temporary cache file %s: %s",
+                    temporary_path,
+                    error,
+                )
 
     logging.debug("Response saved to cache.")
     return data
