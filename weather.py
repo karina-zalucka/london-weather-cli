@@ -1,7 +1,7 @@
 import argparse
 import json
 import requests
-from pathlib import Path #TODO
+from pathlib import Path
 from datetime import date
 import math
 import logging
@@ -11,7 +11,6 @@ import os
 import tempfile
 
 URL = "https://archive-api.open-meteo.com/v1/archive"
-#https://open-meteo.com/en/docs/historical-weather-api
 
 PARAMS = {
     "latitude": 51.5072,
@@ -21,15 +20,6 @@ PARAMS = {
     "daily": "temperature_2m_max,precipitation_sum,weather_code",
     "timezone": "UTC",
 }
-
-# {
-#     "daily": {
-#         "time": ["2022-01-01", "2022-01-02"],
-#         "temperature_2m_max": [12.3, 11.8],
-#         "precipitation_sum": [0.0, 1.4],
-#         "weather_code": [3, 61]
-#     }
-# }
 
 def fetch_data():
     """Fetch weather data, retrying once after a timeout."""
@@ -221,11 +211,15 @@ def valid_precipitation(value):
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return None
 
+    try:
+        value = float(value)
+    except OverflowError:
+        return None
+
     if not math.isfinite(value) or value < 0:
         return None
 
     return value
-
 
 def report(records):
     """Summarize dry and rainy days using valid precipitation values."""
@@ -248,7 +242,7 @@ def report(records):
 
     return (
         f"Total: {len(records)} | Dry: {dry} | Rainy: {rainy} | "
-        f"Rainy-day ratio: {rainy_ratio:.0f}%" #zaokraglenie round
+        f"Rainy-day ratio: {rainy_ratio:.0f}%"
     )
 
 def rainfall_report(records):

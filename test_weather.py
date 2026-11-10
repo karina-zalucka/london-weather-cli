@@ -4,11 +4,8 @@ import unittest
 from datetime import date
 from pathlib import Path
 from unittest.mock import Mock, patch
-
 import requests
-
 import weather
-
 
 class WeatherTests(unittest.TestCase):
     def setUp(self):
@@ -45,8 +42,15 @@ class WeatherTests(unittest.TestCase):
             self.data,
         )
         mock_get.assert_called_once_with(
-            weather.URL,
-            params=weather.PARAMS,
+            "https://archive-api.open-meteo.com/v1/archive",
+            params={
+                "latitude": 51.5072,
+                "longitude": -0.1276,
+                "start_date": "2022-01-01",
+                "end_date": "2022-12-31",
+                "daily": "temperature_2m_max,precipitation_sum,weather_code",
+                "timezone": "UTC",
+            },
             timeout=15,
         )
 

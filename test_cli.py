@@ -6,9 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
-
 import weather
-
 
 class WeatherCliTests(unittest.TestCase):
     def setUp(self):
@@ -161,7 +159,6 @@ class WeatherCliTests(unittest.TestCase):
             json.loads(self.cache.read_text(encoding="utf-8")),
             fresh_data,
         )
-
 
 if __name__ == "__main__":
     unittest.main()
